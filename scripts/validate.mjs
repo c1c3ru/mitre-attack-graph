@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Validação automatizada: abre a app num Chromium headless, confere se o SVG
- * criou <circle>, <line> e <text>, se não há erros no console, e testa clique/destaque.
+ * Validação automatizada: abre a aplicação em um Chromium sem interface gráfica, verifica se o SVG
+ * criou <circle>, <line> e <text>, se não há erros no console, e testa o clique e o destaque.
  * Uso: npm run dev (em outro terminal) e depois node scripts/validate.mjs [url] [pasta-screenshots]
  */
 import { chromium } from 'playwright-core';

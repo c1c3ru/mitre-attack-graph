@@ -1,40 +1,41 @@
-# ATT&CK Graph — Dashboard executivo de CTI em D3.js
+# Grafo ATT&CK: painel executivo de inteligência de ameaças cibernéticas em D3.js
 
-Visualização interativa em **grafo de força direcionada** dos dados STIX do **MITRE ATT&CK Enterprise**, focada no encadeamento:
+Visualização interativa, em **grafo com disposição por simulação de forças**, dos dados STIX do **MITRE ATT&CK Enterprise**, com foco no encadeamento:
 
 **Ator de Ameaça (Grupo) → Software (Malware/Ferramenta) → Técnica (Attack Pattern)**
 
-Em vez da matriz tradicional de táticas × técnicas, a interface mostra *quem* ataca, *com o quê* e *como*, começando por um único grupo para não sobrecarregar a leitura.
+Em vez da matriz tradicional de táticas × técnicas, a interface apresenta *quem* ataca, *com quais recursos* e *de que forma*, partindo de um único grupo para não sobrecarregar a leitura.
 
 ![Grupo selecionado](docs/screenshots/02-grupo-selecionado.png)
 
 ## Funcionalidades
 
 - Nós coloridos por tipo: **Grupo = vermelho**, **Software = laranja**, **Técnica = azul**.
-- Inicia filtrado em **APT29**; busca de atores por nome, ID (`G0016`) ou alias, com até 5 grupos ao mesmo tempo.
-- Clique em um nó para destacar suas conexões (os demais ficam opacos) e abrir o **painel lateral** com descrição, ID do MITRE, cobertura por tática, mitigações prioritárias e softwares/grupos relacionados.
-- Filtros por **tática**, **técnicas via software** e **sub-técnicas** (agrupa na técnica-pai).
-- Pan, zoom, arrastar nós; rótulos de técnicas aparecem ao aproximar.
-- Dark mode com arestas de opacidade adaptativa.
+- Abertura filtrada no grupo **APT29**; pesquisa de atores por nome, identificador (`G0016`) ou denominação alternativa, com até cinco grupos simultâneos.
+- Ao clicar em um nó, as respectivas conexões são destacadas (os demais elementos ficam esmaecidos) e o **painel lateral** exibe descrição, identificador do MITRE, cobertura por tática, mitigações prioritárias e softwares e grupos relacionados.
+- Filtros por **tática**, **técnicas via software** e **subtécnicas** (quando desativado, as subtécnicas são agrupadas na técnica principal).
+- Deslocamento, ampliação e arraste de nós; os rótulos das técnicas aparecem ao ampliar a visualização.
+- Tema escuro com arestas de opacidade adaptativa.
+- Interface em português; nomes e identificadores oficiais do MITRE (grupos, softwares e técnicas) são mantidos no original, e as táticas são exibidas traduzidas, com o nome oficial em inglês disponível no seletor.
 
-## Como rodar
+## Como executar
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
 ```
 
-O repositório já inclui o dataset pré-processado em `public/data/attack-graph.json` (~1,5 MB), então a app funciona sem baixar nada.
+O repositório já inclui o conjunto de dados pré-processado em `public/data/attack-graph.json` (cerca de 1,5 MB); portanto, a aplicação funciona sem downloads adicionais.
 
 ## Atualizar os dados do MITRE
 
-O arquivo oficial `enterprise-attack.json` tem ~54 MB e **não é versionado** (fica em `data/`, ignorado pelo git). Para baixar a versão mais recente e regenerar o JSON reduzido:
+O arquivo oficial `enterprise-attack.json` tem cerca de 54 MB e **não é versionado** (permanece em `data/`, diretório ignorado pelo Git). Para obter a versão mais recente e gerar novamente o JSON reduzido:
 
 ```bash
 npm run data       # = npm run fetch-data && npm run etl
 ```
 
-Ou manualmente:
+Ou, manualmente:
 
 ```bash
 curl -L -o data/enterprise-attack.json \
@@ -42,7 +43,7 @@ curl -L -o data/enterprise-attack.json \
 node scripts/etl.mjs data/enterprise-attack.json public/data/attack-graph.json
 ```
 
-O ETL mantém apenas `intrusion-set`, `malware`, `tool` e `attack-pattern`, relacionamentos `uses`, remove objetos revogados/depreciados e anexa mitigações e táticas a cada técnica. A aplicação **não** consulta o servidor TAXII em tempo real: tudo é carregado de um JSON estático.
+O processo de ETL mantém apenas os objetos `intrusion-set`, `malware`, `tool` e `attack-pattern` e os relacionamentos `uses`, descarta objetos revogados ou descontinuados e associa mitigações e táticas a cada técnica. A aplicação **não** consulta o servidor TAXII em tempo real: todos os dados são carregados de um arquivo JSON estático.
 
 ## Deploy no Vercel
 
@@ -52,24 +53,25 @@ O `vercel.json` já está configurado: o build baixa o STIX oficial, roda o ETL 
 
 ```bash
 npm run dev &
-npm run validate   # Chromium headless: confere <circle>, <line>, <text>, console e interações
+npm run validate   # Chromium sem interface: verifica <circle>, <line>, <text>, erros no console e interações
 ```
 
-Use `CHROMIUM_PATH=/caminho/do/chrome` se o Chromium estiver em outro local.
+Defina `CHROMIUM_PATH=/caminho/do/chrome` caso o Chromium esteja instalado em outro local.
 
 ## Estrutura
 
 ```
-scripts/fetch-data.mjs   download do STIX oficial
+scripts/fetch-data.mjs   download do arquivo STIX oficial
 scripts/etl.mjs          STIX -> { nodes, links } reduzido
 scripts/validate.mjs     teste automatizado no navegador
 src/data.js              índices e montagem do subgrafo
+src/i18n.js              tradução das táticas e formatação em português
 src/graph.js             motor D3 (forças, zoom, destaque)
-src/sidebar.js           painel executivo
-src/main.js              filtros, busca e orquestração
-STATUS_GRAFO_MITRE.md    estado do desenvolvimento
+src/sidebar.js           painel lateral executivo
+src/main.js              filtros, pesquisa e orquestração
+STATUS_GRAFO_MITRE.md    situação do desenvolvimento
 ```
 
 ## Fonte dos dados
 
-[MITRE ATT&CK®](https://attack.mitre.org/) — © The MITRE Corporation. Dados usados conforme os [termos de uso do ATT&CK](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/).
+[MITRE ATT&CK®](https://attack.mitre.org/) — © The MITRE Corporation. Dados utilizados conforme os [termos de uso do ATT&CK](https://attack.mitre.org/resources/legal-and-branding/terms-of-use/).

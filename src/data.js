@@ -3,6 +3,8 @@
  * e monta subgrafos { nodes, links } para o D3 a partir dos filtros da UI.
  */
 
+import { TACTIC_PT } from './i18n.js';
+
 export async function loadDataset(url = 'data/attack-graph.json') {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Falha ao carregar ${url} (HTTP ${res.status})`);
@@ -23,8 +25,9 @@ export function indexDataset(raw) {
   const groups = raw.nodes
     .filter((n) => n.type === 'group')
     .sort((a, b) => a.name.localeCompare(b.name));
-  const tacticName = new Map(raw.tactics.map((t) => [t.shortname, t.name]));
-  return { ...raw, byId, out, inc, groups, tacticName };
+  const tactics = raw.tactics.map((t) => ({ ...t, nameEn: t.name, name: TACTIC_PT[t.shortname] ?? t.name }));
+  const tacticName = new Map(tactics.map((t) => [t.shortname, t.name]));
+  return { ...raw, tactics, byId, out, inc, groups, tacticName };
 }
 
 const parentOf = (id) => (id.includes('.') ? id.split('.')[0] : id);
