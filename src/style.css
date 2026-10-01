@@ -55,7 +55,7 @@ html, body {
 
 .controls { display: flex; gap: 20px; flex: 1; flex-wrap: wrap; align-items: flex-start; }
 .control { display: flex; flex-direction: column; gap: 6px; }
-.control > label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+.control > label, .control-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
 .group-picker { flex: 1; min-width: 280px; max-width: 560px; }
 
 input[type='search'], select {
@@ -232,3 +232,26 @@ button:hover { border-color: var(--accent); }
   .layout { grid-template-columns: 1fr; grid-template-rows: 60vh auto; height: auto; }
   .sidebar { border-left: 0; border-top: 1px solid var(--border); }
 }
+
+/* ---------- Seletor de idioma ---------- */
+.segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.segmented button {
+  border: 0; border-radius: 0; padding: 7px 12px; background: var(--bg);
+  color: var(--text-muted); font-weight: 600; letter-spacing: 0.04em;
+}
+.segmented button + button { border-left: 1px solid var(--border); }
+.segmented button[aria-pressed='true'] { background: rgba(94, 234, 212, 0.14); color: var(--accent); }
+.segmented button:hover { color: var(--text); }
+
+/* ---------- Listas longas: "Mostrar mais N" ---------- */
+details.more { margin-top: 6px; }
+details.more > summary {
+  list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--accent); padding: 4px 2px; user-select: none;
+}
+details.more > summary::-webkit-details-marker { display: none; }
+details.more > summary::after { content: '▾'; transition: transform 0.15s; }
+details.more[open] > summary::after { transform: rotate(180deg); }
+details.more > summary:hover { text-decoration: underline; }
+details.more[open] > summary { margin-bottom: 4px; }
+.sb-note { margin: -8px 0 14px; font-size: 11px; color: var(--text-dim); font-style: italic; }

@@ -119,6 +119,15 @@ for (const r of objects) {
 const used = new Set(links.flatMap((l) => [l.source, l.target]));
 for (const id of [...used]) if (id.includes('.')) used.add(id.split('.')[0]);
 const nodes = [...byStixId.values()].filter((n) => used.has(n.id));
+
+// Traduções das descrições (i18n/pt-BR/descriptions.json: { "G0016": "texto", ... })
+const ptFile = resolve('i18n/pt-BR/descriptions.json');
+if (existsSync(ptFile)) {
+  const pt = JSON.parse(readFileSync(ptFile, 'utf8'));
+  let applied = 0;
+  for (const n of nodes) if (pt[n.id]) (n.description_pt = pt[n.id]), applied++;
+  console.log(`Descrições em português aplicadas: ${applied}`);
+}
 for (const n of nodes) if (n.mitigations) n.mitigations.sort((a, b) => a.id.localeCompare(b.id));
 
 // Táticas na ordem da kill chain (definida pela matriz Enterprise)

@@ -41,3 +41,10 @@
   - Montagem do subgrafo: de 16 a 50 ms; maior intervalo entre quadros durante a simulação ≈ 117 ms (sem bloqueio da thread principal).
 - Ajuste de experiência realizado no ciclo: com o foco em um grupo, todos os rótulos de técnicas ficavam visíveis e poluíam a tela; agora, eles aparecem somente com ampliação.
 - Observação: algumas técnicas não possuem mitigação mapeada pelo próprio MITRE (por exemplo, T1083); nesses casos, o painel informa "Nenhuma mitigação mapeada".
+
+## Ciclo 2 (01/10/2026): idioma e listas longas
+- [x] Seletor de idioma PT/EN (`src/i18n.js`), com a escolha salva no navegador e aplicada aos textos estáticos (`data-i18n`), ao painel lateral, ao filtro de táticas e às estatísticas.
+- [x] Traduções: 16 táticas, 44 mitigações, plataformas e descrições dos 176 grupos (`i18n/pt-BR/descriptions.json`, incorporadas pelo ETL).
+- [x] Pendente: descrições de 825 softwares e 621 técnicas permanecem em inglês, com aviso no painel.
+- [x] Listas com mais de 10 itens (arsenal, mitigações, softwares, grupos) exibem o restante em um `<details>` "Mostrar mais N".
+- Validação: APT29 exibe 10 de 49 softwares (18 itens visíveis no painel) e 57 após expandir; troca PT → EN → PT sem erros no console.

@@ -38,6 +38,32 @@ report.highlighted = await count('#graph .node.hl');
 report.focusMode = await page.$eval('#graph', (s) => s.classList.contains('has-focus'));
 if (shots) await page.screenshot({ path: `${shots}/02-grupo-selecionado.png` });
 
+// Lista longa (> 10 softwares): "Mostrar mais N" expande os itens restantes (grupo ainda selecionado)
+report.listVisibleBefore = await page.$$eval('.sb-section .item-list li', (els) => els.filter((e) => e.checkVisibility()).length);
+report.moreSummary = (await page.textContent('details.more > summary'))?.trim();
+await page.click('details.more > summary');
+await page.waitForTimeout(200);
+report.listVisibleAfter = await page.$$eval('.sb-section .item-list li', (els) => els.filter((e) => e.checkVisibility()).length);
+report.moreSummaryOpen = (await page.textContent('details.more > summary'))?.trim();
+report.descriptionPt = (await page.textContent('.sb-desc')).slice(0, 60);
+if (shots) await page.screenshot({ path: `${shots}/05-lista-expandida.png` });
+
+// Troca de idioma PT -> EN -> PT
+await page.click('#lang-switch [data-lang="en"]');
+await page.waitForTimeout(300);
+report.en = {
+  htmlLang: await page.getAttribute('html', 'lang'),
+  label: await page.textContent('label[for="tactic-filter"]'),
+  stats: await page.textContent('#graph-stats'),
+  section: await page.textContent('.sb-section h3'),
+  description: (await page.textContent('.sb-desc')).slice(0, 60),
+};
+if (shots) await page.screenshot({ path: `${shots}/06-ingles.png` });
+await page.click('#lang-switch [data-lang="pt"]');
+await page.waitForTimeout(300);
+report.backToPt = await page.textContent('label[for="tactic-filter"]');
+await page.click('#graph', { position: { x: 5, y: 5 } });
+
 // Clique numa técnica -> mitigações no painel
 await page.$eval('#graph .node.technique', (el) => el.dispatchEvent(new MouseEvent('click', { bubbles: true })));
 await page.waitForTimeout(400);
@@ -72,6 +98,6 @@ report.maxFrameGapMs = await page.evaluate(
 report.consoleErrors = errors;
 console.log(JSON.stringify(report, null, 2));
 await browser.close();
-const ok = report.circles > 0 && report.lines > 0 && report.texts > 0 && errors.length === 0 && report.focusMode;
+const ok = report.listVisibleAfter > report.listVisibleBefore && report.en.label === 'Tactic' && report.backToPt === 'Tática' && report.circles > 0 && report.lines > 0 && report.texts > 0 && errors.length === 0 && report.focusMode;
 console.log(ok ? '\nVALIDAÇÃO OK' : '\nVALIDAÇÃO FALHOU');
 process.exit(ok ? 0 : 1);
