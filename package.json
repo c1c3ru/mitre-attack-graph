@@ -1,0 +1,24 @@
+{
+  "name": "mitre-attack-graph",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dashboard executivo em grafo (D3.js) dos relacionamentos Grupo -> Software -> Técnica do MITRE ATT&CK",
+  "type": "module",
+  "scripts": {
+    "fetch-data": "node scripts/fetch-data.mjs",
+    "etl": "node scripts/etl.mjs",
+    "data": "npm run fetch-data && npm run etl",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "validate": "node scripts/validate.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^7.9.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.63.0",
+    "vite": "^6.4.3"
+  }
+}
