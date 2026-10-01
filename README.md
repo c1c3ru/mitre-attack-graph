@@ -16,7 +16,13 @@ Em vez da matriz tradicional de táticas × técnicas, a interface apresenta *qu
 - Filtros por **tática**, **técnicas via software** e **subtécnicas** (quando desativado, as subtécnicas são agrupadas na técnica principal).
 - Deslocamento, ampliação e arraste de nós; os rótulos das técnicas aparecem ao ampliar a visualização.
 - Tema escuro com arestas de opacidade adaptativa.
-- Interface em português; nomes e identificadores oficiais do MITRE (grupos, softwares e técnicas) são mantidos no original, e as táticas são exibidas traduzidas, com o nome oficial em inglês disponível no seletor.
+- Seletor de idioma **PT / EN** no topo da página; a escolha fica salva no navegador.
+- Em português, as táticas, as mitigações, as plataformas e as descrições dos grupos são exibidas traduzidas. Nomes e identificadores oficiais do MITRE (grupos, softwares e técnicas) são mantidos no original. As descrições de softwares e técnicas ainda são exibidas no original em inglês, com um aviso.
+- Listas do painel lateral com mais de 10 itens exibem os demais sob **Mostrar mais N**.
+
+### Traduções
+
+As descrições traduzidas ficam em `i18n/pt-BR/descriptions.json` (chave = ID do MITRE). O ETL (`npm run etl`) incorpora esse arquivo ao JSON da aplicação no campo `description_pt`. Os demais textos da interface estão em `src/i18n.js`.
 
 ## Como executar
 

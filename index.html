@@ -12,55 +12,63 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
         <div>
-          <h1>Grafo ATT&amp;CK</h1>
-          <p class="subtitle">Grupo → Software → Técnica</p>
+          <h1 data-i18n="brand.title">Grafo ATT&amp;CK</h1>
+          <p class="subtitle" data-i18n="brand.subtitle">Grupo → Software → Técnica</p>
         </div>
       </div>
 
       <div class="controls">
         <div class="control group-picker">
-          <label for="group-search">Ator de ameaça</label>
+          <label for="group-search" data-i18n="filter.group">Ator de ameaça</label>
           <div class="combo">
-            <input id="group-search" type="search" placeholder="Pesquisar grupo (por exemplo, APT29 ou Lazarus)…" autocomplete="off" />
+            <input id="group-search" type="search" data-i18n-attr="placeholder:filter.group.placeholder" placeholder="Pesquisar grupo (por exemplo, APT29 ou Lazarus)…" autocomplete="off" />
             <ul id="group-options" class="combo-list" role="listbox" hidden></ul>
           </div>
           <div id="group-chips" class="chips" aria-live="polite"></div>
         </div>
 
         <div class="control">
-          <label for="tactic-filter">Tática</label>
+          <label for="tactic-filter" data-i18n="filter.tactic">Tática</label>
           <select id="tactic-filter">
             <option value="">Todas as táticas</option>
           </select>
         </div>
 
         <div class="control toggles">
-          <label class="toggle"><input id="toggle-software-tech" type="checkbox" checked /> Incluir técnicas via software</label>
-          <label class="toggle"><input id="toggle-subtech" type="checkbox" checked /> Exibir subtécnicas</label>
+          <label class="toggle"><input id="toggle-software-tech" type="checkbox" checked /> <span data-i18n="filter.viaSoftware">Incluir técnicas via software</span></label>
+          <label class="toggle"><input id="toggle-subtech" type="checkbox" checked /> <span data-i18n="filter.subtech">Exibir subtécnicas</span></label>
+        </div>
+
+        <div class="control lang-control">
+          <span class="control-label" data-i18n="lang.label">Idioma</span>
+          <div id="lang-switch" class="segmented" role="group" data-i18n-attr="aria-label:lang.label" aria-label="Idioma">
+            <button type="button" data-lang="pt" aria-pressed="true" title="Português (Brasil)">PT</button>
+            <button type="button" data-lang="en" aria-pressed="false" title="English">EN</button>
+          </div>
         </div>
       </div>
     </header>
 
     <main class="layout">
-      <section class="stage" aria-label="Grafo de relacionamentos">
-        <svg id="graph" role="img" aria-label="Grafo de relacionamentos do MITRE ATT&amp;CK com disposição por simulação de forças"></svg>
+      <section class="stage" data-i18n-attr="aria-label:stage.aria" aria-label="Grafo de relacionamentos">
+        <svg id="graph" role="img" data-i18n-attr="aria-label:svg.aria" aria-label="Grafo de relacionamentos do MITRE ATT&amp;CK com disposição por simulação de forças"></svg>
 
-        <div class="legend" aria-label="Legenda">
-          <span><i class="dot group"></i>Grupo</span>
-          <span><i class="dot software"></i>Software</span>
-          <span><i class="dot technique"></i>Técnica</span>
+        <div class="legend" data-i18n-attr="aria-label:legend.aria" aria-label="Legenda">
+          <span><i class="dot group"></i><span data-i18n="legend.group">Grupo</span></span>
+          <span><i class="dot software"></i><span data-i18n="legend.software">Software</span></span>
+          <span><i class="dot technique"></i><span data-i18n="legend.technique">Técnica</span></span>
         </div>
 
         <div class="stage-tools">
           <span id="graph-stats" class="stats"></span>
-          <button id="btn-reset" type="button" title="Remover o destaque e centralizar a visualização">Centralizar</button>
+          <button id="btn-reset" type="button" data-i18n="btn.reset" data-i18n-attr="title:btn.reset.title" title="Remover o destaque e centralizar a visualização">Centralizar</button>
         </div>
 
         <div id="tooltip" class="tooltip" hidden></div>
-        <div id="loading" class="loading">Carregando a base de dados do ATT&amp;CK…</div>
+        <div id="loading" class="loading" data-i18n="loading">Carregando a base de dados do ATT&amp;CK…</div>
       </section>
 
-      <aside id="sidebar" class="sidebar" aria-label="Detalhes do nó">
+      <aside id="sidebar" class="sidebar" data-i18n-attr="aria-label:sidebar.aria" aria-label="Detalhes do nó">
         <div id="sidebar-content"></div>
       </aside>
     </main>

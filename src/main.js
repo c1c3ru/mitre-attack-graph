@@ -1,7 +1,7 @@
 import { loadDataset, buildSubgraph } from './data.js';
 import { createGraph } from './graph.js';
 import { createSidebar } from './sidebar.js';
-import { fmtNumber, plural } from './i18n.js';
+import { applyStatic, fmtNumber, getLang, setLang, t, tacticLabel, tn } from './i18n.js';
 
 const DEFAULT_GROUPS = ['APT29']; // inicia filtrado para evitar sobrecarga visual
 const MAX_GROUPS = 5;
@@ -16,6 +16,8 @@ function syncTopbarHeight() {
 }
 
 async function init() {
+  setLang(getLang());
+  applyStatic();
   syncTopbarHeight();
   window.addEventListener('resize', syncTopbarHeight);
 
@@ -25,7 +27,7 @@ async function init() {
   } catch (err) {
     console.error(err);
     $('#loading').classList.add('error');
-    $('#loading').textContent = `Erro ao carregar os dados: ${err.message}. Execute "npm run data" para gerar o arquivo public/data/attack-graph.json.`;
+    $('#loading').textContent = t('loading.error', { msg: err.message });
     return;
   }
   window.__ATTACK__ = ds; // útil para depuração no console
@@ -38,7 +40,7 @@ async function init() {
       if (!d) return (tooltip.hidden = true);
       const rect = stage.getBoundingClientRect();
       tooltip.hidden = false;
-      tooltip.innerHTML = `<b>${esc(d.name)}</b><span class="tid">${esc(d.id)}</span><br><span class="muted">${plural(d.degree, 'conexão', 'conexões')} no grafo</span>`;
+      tooltip.innerHTML = `<b>${esc(d.name)}</b><span class="tid">${esc(d.id)}</span><br><span class="muted">${tn(d.degree, 'n.connection')} ${t('tooltip.inGraph')}</span>`;
       tooltip.style.left = `${event.clientX - rect.left + 14}px`;
       tooltip.style.top = `${event.clientY - rect.top + 14}px`;
     },
@@ -54,11 +56,16 @@ async function init() {
 
   // ---------- Filtros ----------
   const tacticSel = $('#tactic-filter');
-  for (const t of ds.tactics) {
-    const opt = new Option(t.name, t.shortname);
-    opt.title = `${t.nameEn} (${t.id})`;
-    tacticSel.add(opt);
+  function renderTacticOptions() {
+    tacticSel.replaceChildren(new Option(t('filter.tactic.all'), ''));
+    for (const tac of ds.tactics) {
+      const opt = new Option(tacticLabel(tac), tac.shortname);
+      opt.title = `${tac.nameEn} (${tac.id})`;
+      tacticSel.add(opt);
+    }
+    tacticSel.value = state.tactic;
   }
+  renderTacticOptions();
   tacticSel.addEventListener('change', () => ((state.tactic = tacticSel.value), refresh()));
   $('#toggle-software-tech').addEventListener('change', (e) => ((state.viaSoftware = e.target.checked), refresh()));
   $('#toggle-subtech').addEventListener('change', (e) => ((state.subtechniques = e.target.checked), refresh()));
@@ -85,7 +92,7 @@ async function init() {
               <span class="gid">${esc(g.id)}</span></li>`,
           )
           .join('')
-      : '<li class="muted">Nenhum grupo encontrado</li>';
+      : `<li class="muted">${t('filter.group.none')}</li>`;
     list.hidden = false;
   }
   input.addEventListener('focus', renderOptions);
@@ -133,7 +140,7 @@ async function init() {
 
   function renderChips() {
     $('#group-chips').innerHTML = state.groups
-      .map((id) => `<span class="chip">${esc(ds.byId.get(id).name)}<button type="button" data-remove="${esc(id)}" aria-label="Remover ${esc(ds.byId.get(id).name)}">×</button></span>`)
+      .map((id) => `<span class="chip">${esc(ds.byId.get(id).name)}<button type="button" data-remove="${esc(id)}" aria-label="${esc(t('filter.group.remove', { name: ds.byId.get(id).name }))}">×</button></span>`)
       .join('');
     syncTopbarHeight();
   }
@@ -142,6 +149,19 @@ async function init() {
     if (b) removeGroup(b.dataset.remove);
   });
 
+  let lastStats = null;
+  function renderStats() {
+    if (!lastStats) return;
+    const { types, links, ms } = lastStats;
+    $('#graph-stats').textContent = [
+      tn(types.group, 'n.group'),
+      tn(types.software, 'n.software'),
+      tn(types.technique, 'n.technique'),
+      tn(links, 'n.link'),
+      `${fmtNumber(ms)} ms`,
+    ].join(' · ');
+  }
+
   function refresh() {
     renderChips();
     const t0 = performance.now();
@@ -149,15 +169,27 @@ async function init() {
     const stats = graph.update(sub);
     const types = { group: 0, software: 0, technique: 0 };
     sub.nodes.forEach((n) => types[n.type]++);
-    $('#graph-stats').textContent = [
-      plural(types.group, 'grupo'),
-      plural(types.software, 'software'),
-      plural(types.technique, 'técnica'),
-      plural(stats.links, 'aresta'),
-      `${fmtNumber(Math.round(performance.now() - t0))} ms`,
-    ].join(' · ');
+    lastStats = { types, links: stats.links, ms: Math.round(performance.now() - t0) };
+    renderStats();
     if (graph.selectedId) sidebar.render(graph.selectedId);
   }
+
+  // ---------- Idioma ----------
+  const langSwitch = $('#lang-switch');
+  const syncLangButtons = () =>
+    langSwitch.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === getLang())));
+  syncLangButtons();
+  langSwitch.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-lang]');
+    if (!b || b.dataset.lang === getLang()) return;
+    setLang(b.dataset.lang);
+    syncLangButtons();
+    applyStatic();
+    renderTacticOptions();
+    renderChips();
+    renderStats();
+    sidebar.rerender();
+  });
 
   // ---------- Estado inicial ----------
   const initial = DEFAULT_GROUPS.map((name) => ds.groups.find((g) => g.name === name)?.id).filter(Boolean);
