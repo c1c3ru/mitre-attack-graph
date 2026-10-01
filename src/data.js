@@ -27,7 +27,15 @@ export function indexDataset(raw) {
     .sort((a, b) => a.name.localeCompare(b.name));
   const tactics = raw.tactics.map((t) => ({ ...t, nameEn: t.name }));
   const tacticByShort = new Map(tactics.map((t) => [t.shortname, t]));
-  return { ...raw, tactics, byId, out, inc, groups, tacticByShort };
+  // Mitigação -> técnicas que ela abrange (para o modal de detalhes)
+  const mitigations = new Map();
+  for (const n of raw.nodes) {
+    for (const m of n.mitigations ?? []) {
+      if (!mitigations.has(m.id)) mitigations.set(m.id, { ...m, techniques: [] });
+      mitigations.get(m.id).techniques.push(n);
+    }
+  }
+  return { ...raw, tactics, byId, out, inc, groups, tacticByShort, mitigations };
 }
 
 const parentOf = (id) => (id.includes('.') ? id.split('.')[0] : id);
@@ -88,7 +96,7 @@ export function buildSubgraph(ds, { groups, tactic = '', viaSoftware = true, sub
 
   const nodes = [...nodeIds].map((id) => {
     const n = ds.byId.get(id);
-    return { id: n.id, name: n.name, type: n.type };
+    return { id: n.id, name: n.name, name_pt: n.name_pt, type: n.type };
   });
   return { nodes, links: [...linkMap.values()] };
 }

@@ -1,7 +1,7 @@
 import { loadDataset, buildSubgraph } from './data.js';
 import { createGraph } from './graph.js';
 import { createSidebar } from './sidebar.js';
-import { applyStatic, fmtNumber, getLang, setLang, t, tacticLabel, tn } from './i18n.js';
+import { applyStatic, fmtNumber, getLang, nodeName, setLang, t, tacticLabel, tn } from './i18n.js';
 
 const DEFAULT_GROUPS = ['APT29']; // inicia filtrado para evitar sobrecarga visual
 const MAX_GROUPS = 5;
@@ -40,7 +40,7 @@ async function init() {
       if (!d) return (tooltip.hidden = true);
       const rect = stage.getBoundingClientRect();
       tooltip.hidden = false;
-      tooltip.innerHTML = `<b>${esc(d.name)}</b><span class="tid">${esc(d.id)}</span><br><span class="muted">${tn(d.degree, 'n.connection')} ${t('tooltip.inGraph')}</span>`;
+      tooltip.innerHTML = `<b>${esc(nodeName(d))}</b><span class="tid">${esc(d.id)}</span><br><span class="muted">${tn(d.degree, 'n.connection')} ${t('tooltip.inGraph')}</span>`;
       tooltip.style.left = `${event.clientX - rect.left + 14}px`;
       tooltip.style.top = `${event.clientY - rect.top + 14}px`;
     },
@@ -52,6 +52,8 @@ async function init() {
       if (!graph.focusNode(id)) sidebar.render(id);
     },
     onAddGroup: (id) => addGroup(id, { focus: true }),
+    onFilterTactic: (shortname) => setTactic(state.tactic === shortname ? '' : shortname),
+    inGraph: (id) => graph.has(id),
   });
 
   // ---------- Filtros ----------
@@ -60,13 +62,19 @@ async function init() {
     tacticSel.replaceChildren(new Option(t('filter.tactic.all'), ''));
     for (const tac of ds.tactics) {
       const opt = new Option(tacticLabel(tac), tac.shortname);
-      opt.title = `${tac.nameEn} (${tac.id})`;
+      opt.title = getLang() === 'en' ? `${tac.nameEn} (${tac.id})` : tac.id;
       tacticSel.add(opt);
     }
     tacticSel.value = state.tactic;
   }
   renderTacticOptions();
-  tacticSel.addEventListener('change', () => ((state.tactic = tacticSel.value), refresh()));
+  tacticSel.addEventListener('change', () => setTactic(tacticSel.value));
+  /** Aplica o filtro de tática (pelo seletor do topo ou pelos atalhos do painel). */
+  function setTactic(shortname) {
+    state.tactic = shortname;
+    tacticSel.value = shortname;
+    refresh();
+  }
   $('#toggle-software-tech').addEventListener('change', (e) => ((state.viaSoftware = e.target.checked), refresh()));
   $('#toggle-subtech').addEventListener('change', (e) => ((state.subtechniques = e.target.checked), refresh()));
   $('#btn-reset').addEventListener('click', () => (graph.select(null), graph.fitToView()));
@@ -188,6 +196,7 @@ async function init() {
     renderTacticOptions();
     renderChips();
     renderStats();
+    graph.relabel();
     sidebar.rerender();
   });
 

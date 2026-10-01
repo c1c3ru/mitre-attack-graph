@@ -2,6 +2,7 @@
  * Motor de renderização: SVG + d3.forceSimulation + pan/zoom + destaque de vizinhança.
  */
 import * as d3 from 'd3';
+import { nodeName } from './i18n.js';
 
 const RADIUS = { group: 18, software: 9, technique: 5 };
 const RING = { group: 0, software: 0.42, technique: 1 }; // raio relativo de cada camada
@@ -144,7 +145,7 @@ export function createGraph(svgEl, { onSelect, onHover } = {}) {
       .join('text')
       .attr('class', (d) => `label ${d.type}`)
       .attr('text-anchor', 'middle')
-      .text((d) => (d.type === 'technique' ? `${d.id} ${truncate(d.name, 26)}` : d.name));
+      .text(labelText);
 
     simulation.nodes(nodes);
     simulation.force('link').links(links);
@@ -154,6 +155,11 @@ export function createGraph(svgEl, { onSelect, onHover } = {}) {
     if (selectedId && !adjacency.has(selectedId)) select(null);
     else applyHighlight();
     return { nodes: nodes.length, links: links.length };
+  }
+
+  /** Reaplica os rótulos (ex.: após a troca de idioma) sem reiniciar a simulação. */
+  function relabel() {
+    labelSel.text(labelText);
   }
 
   function drag() {
@@ -245,12 +251,15 @@ export function createGraph(svgEl, { onSelect, onHover } = {}) {
     select,
     focusNode,
     fitToView,
+    relabel,
     has: (id) => adjacency.has(id),
     get selectedId() {
       return selectedId;
     },
   };
 }
+
+const labelText = (d) => (d.type === 'technique' ? `${d.id} ${truncate(nodeName(d), 26)}` : d.name);
 
 function truncate(s, n) {
   return s.length > n ? `${s.slice(0, n - 1)}…` : s;
