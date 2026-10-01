@@ -1,6 +1,7 @@
 import { loadDataset, buildSubgraph } from './data.js';
 import { createGraph } from './graph.js';
 import { createSidebar } from './sidebar.js';
+import { fmtNumber, plural } from './i18n.js';
 
 const DEFAULT_GROUPS = ['APT29']; // inicia filtrado para evitar sobrecarga visual
 const MAX_GROUPS = 5;
@@ -24,7 +25,7 @@ async function init() {
   } catch (err) {
     console.error(err);
     $('#loading').classList.add('error');
-    $('#loading').textContent = `Erro ao carregar dados: ${err.message}. Rode "npm run data" para gerar public/data/attack-graph.json.`;
+    $('#loading').textContent = `Erro ao carregar os dados: ${err.message}. Execute "npm run data" para gerar o arquivo public/data/attack-graph.json.`;
     return;
   }
   window.__ATTACK__ = ds; // útil para depuração no console
@@ -37,7 +38,7 @@ async function init() {
       if (!d) return (tooltip.hidden = true);
       const rect = stage.getBoundingClientRect();
       tooltip.hidden = false;
-      tooltip.innerHTML = `<b>${esc(d.name)}</b><span class="tid">${esc(d.id)}</span><br><span class="muted">${d.degree} conexões no grafo</span>`;
+      tooltip.innerHTML = `<b>${esc(d.name)}</b><span class="tid">${esc(d.id)}</span><br><span class="muted">${plural(d.degree, 'conexão', 'conexões')} no grafo</span>`;
       tooltip.style.left = `${event.clientX - rect.left + 14}px`;
       tooltip.style.top = `${event.clientY - rect.top + 14}px`;
     },
@@ -53,7 +54,11 @@ async function init() {
 
   // ---------- Filtros ----------
   const tacticSel = $('#tactic-filter');
-  for (const t of ds.tactics) tacticSel.add(new Option(t.name, t.shortname));
+  for (const t of ds.tactics) {
+    const opt = new Option(t.name, t.shortname);
+    opt.title = `${t.nameEn} (${t.id})`;
+    tacticSel.add(opt);
+  }
   tacticSel.addEventListener('change', () => ((state.tactic = tacticSel.value), refresh()));
   $('#toggle-software-tech').addEventListener('change', (e) => ((state.viaSoftware = e.target.checked), refresh()));
   $('#toggle-subtech').addEventListener('change', (e) => ((state.subtechniques = e.target.checked), refresh()));
@@ -144,7 +149,13 @@ async function init() {
     const stats = graph.update(sub);
     const types = { group: 0, software: 0, technique: 0 };
     sub.nodes.forEach((n) => types[n.type]++);
-    $('#graph-stats').textContent = `${types.group} grupos · ${types.software} softwares · ${types.technique} técnicas · ${stats.links} arestas · ${(performance.now() - t0).toFixed(0)} ms`;
+    $('#graph-stats').textContent = [
+      plural(types.group, 'grupo'),
+      plural(types.software, 'software'),
+      plural(types.technique, 'técnica'),
+      plural(stats.links, 'aresta'),
+      `${fmtNumber(Math.round(performance.now() - t0))} ms`,
+    ].join(' · ');
     if (graph.selectedId) sidebar.render(graph.selectedId);
   }
 

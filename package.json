@@ -2,7 +2,7 @@
   "name": "mitre-attack-graph",
   "version": "1.0.0",
   "private": true,
-  "description": "Dashboard executivo em grafo (D3.js) dos relacionamentos Grupo -> Software -> Técnica do MITRE ATT&CK",
+  "description": "Painel executivo em grafo (D3.js) dos relacionamentos Grupo → Software → Técnica do MITRE ATT&CK",
   "type": "module",
   "scripts": {
     "fetch-data": "node scripts/fetch-data.mjs",

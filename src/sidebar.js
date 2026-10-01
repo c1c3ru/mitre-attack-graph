@@ -2,8 +2,9 @@
  * Painel lateral executivo: resumo legível do nó selecionado.
  */
 import { groupProfile, tacticBreakdown, topMitigations } from './data.js';
+import { fmtDate, fmtNumber, plural } from './i18n.js';
 
-const TYPE_LABEL = { group: 'Ator de Ameaça', software: 'Software', technique: 'Técnica' };
+const TYPE_LABEL = { group: 'Ator de ameaça', software: 'Software', technique: 'Técnica' };
 
 const esc = (s = '') =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -21,16 +22,16 @@ export function createSidebar(el, ds, { onNavigate, onAddGroup, getState }) {
     return `
       <span class="sb-type"><i class="dot ${n.type}"></i>${TYPE_LABEL[n.type]}${subtype}</span>
       <h2 class="sb-title">${esc(n.name)}</h2>
-      <a class="sb-id" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.id)} ↗ attack.mitre.org</a>
-      ${n.aliases?.length ? `<div class="sb-aliases">Também conhecido como: ${esc(n.aliases.slice(0, 8).join(', '))}</div>` : ''}
+      <a class="sb-id" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.id)} · ver em attack.mitre.org ↗</a>
+      ${n.aliases?.length ? `<div class="sb-aliases">Outras denominações: ${esc(n.aliases.slice(0, 8).join(', '))}</div>` : ''}
       <p class="sb-desc">${esc(n.description || 'Sem descrição disponível.')}</p>`;
   }
 
   const kpis = (items) =>
-    `<div class="kpis">${items.map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join('')}</div>`;
+    `<div class="kpis">${items.map(([v, l]) => `<div class="kpi"><b>${fmtNumber(v)}</b><span>${l}</span></div>`).join('')}</div>`;
 
   function bars(rows) {
-    if (!rows.length) return '<p class="muted">Sem dados.</p>';
+    if (!rows.length) return '<p class="muted">Não há dados disponíveis.</p>';
     const max = Math.max(...rows.map((r) => r.count));
     return `<div class="bars">${rows
       .map(
@@ -42,12 +43,12 @@ export function createSidebar(el, ds, { onNavigate, onAddGroup, getState }) {
   }
 
   function itemList(nodes, { limit = 12, extra } = {}) {
-    if (!nodes.length) return '<p class="muted">Nenhum.</p>';
+    if (!nodes.length) return '<p class="muted">Nenhum item.</p>';
     const rows = nodes
       .slice(0, limit)
       .map((n) => `<li class="clickable" data-nav="${esc(n.id)}"><span class="iid">${esc(n.id)}</span><span>${esc(n.name)}${extra ? ` <span class="muted">${extra(n)}</span>` : ''}</span></li>`)
       .join('');
-    const more = nodes.length > limit ? `<p class="muted">+ ${nodes.length - limit} outros</p>` : '';
+    const more = nodes.length > limit ? `<p class="muted">E mais ${fmtNumber(nodes.length - limit)}.</p>` : '';
     return `<ul class="item-list">${rows}</ul>${more}`;
   }
 
@@ -55,7 +56,7 @@ export function createSidebar(el, ds, { onNavigate, onAddGroup, getState }) {
     if (!ms.length) return '<p class="muted">Nenhuma mitigação mapeada.</p>';
     return `<ul class="item-list">${ms
       .map(
-        (m) => `<li><span class="iid">${esc(m.id)}</span><span>${esc(m.name)}${m.count ? ` <span class="muted">· cobre ${m.count} técnica(s)</span>` : ''}</span></li>`,
+        (m) => `<li><span class="iid">${esc(m.id)}</span><span>${esc(m.name)}${m.count ? ` <span class="muted">· abrange ${plural(m.count, 'técnica')}</span>` : ''}</span></li>`,
       )
       .join('')}</ul>`;
   }
@@ -74,11 +75,11 @@ export function createSidebar(el, ds, { onNavigate, onAddGroup, getState }) {
       ${kpis([
         [p.software.length, 'Softwares'],
         [p.direct.size, 'Técnicas diretas'],
-        [p.techniques.length, viaSoftware ? 'Técnicas totais' : 'Técnicas'],
+        [p.techniques.length, viaSoftware ? 'Total de técnicas' : 'Técnicas'],
       ])}
       ${section('Cobertura por tática', bars(tacticBreakdown(ds, p.techniques)))}
       ${section('Mitigações prioritárias', mitigationList(topMitigations(p.techniques, 8)))}
-      ${section('Arsenal (softwares)', itemList(swByUse, { extra: (s) => `· ${s.uses} técnicas` }))}`;
+      ${section('Arsenal de softwares', itemList(swByUse, { extra: (s) => `· ${plural(s.uses, 'técnica')}` }))}`;
   }
 
   function renderSoftware(n) {
@@ -110,7 +111,7 @@ export function createSidebar(el, ds, { onNavigate, onAddGroup, getState }) {
       ${n.platforms?.length ? section('Plataformas', `<div class="pill-list">${n.platforms.map((p) => `<span class="pill static">${esc(p)}</span>`).join('')}</div>`) : ''}
       ${section('Mitigações', mitigationList(n.mitigations ?? []))}
       ${section('Usada pelos grupos', groupPills(groups))}
-      ${section('Softwares que implementam', itemList(software, { limit: 10 }))}`;
+      ${section('Softwares que a implementam', itemList(software, { limit: 10 }))}`;
   }
 
   function groupPills(groups) {
@@ -120,25 +121,25 @@ export function createSidebar(el, ds, { onNavigate, onAddGroup, getState }) {
       .sort((a, b) => a.name.localeCompare(b.name))
       .slice(0, 30)
       .map((g) => `<span class="pill" ${sel.has(g.id) ? `data-nav="${esc(g.id)}"` : `data-add-group="${esc(g.id)}" title="Adicionar ao grafo"`}>${sel.has(g.id) ? '' : '+ '}${esc(g.name)}</span>`)
-      .join('')}${groups.length > 30 ? `<span class="muted">+${groups.length - 30}</span>` : ''}</div>`;
+      .join('')}${groups.length > 30 ? `<span class="muted">e mais ${fmtNumber(groups.length - 30)}</span>` : ''}</div>`;
   }
 
   function renderEmpty() {
     const m = ds.meta;
     return `<div class="empty-state">
-      <h2>Painel de Inteligência</h2>
+      <h2>Painel de inteligência</h2>
       <p>Visualização relacional do MITRE ATT&amp;CK: quem ataca, com quais ferramentas e de que forma.</p>
       <ol>
-        <li>Escolha um <b>Ator de Ameaça</b> na busca acima.</li>
-        <li>Clique em um nó para destacar suas conexões.</li>
-        <li>Use a roda do mouse para zoom e arraste para navegar; aproxime para ler as técnicas.</li>
+        <li>Selecione um <b>ator de ameaça</b> no campo de pesquisa acima.</li>
+        <li>Clique em um nó para destacar as respectivas conexões.</li>
+        <li>Utilize a roda do mouse para ampliar ou reduzir e arraste para navegar; amplie a visualização para ler os nomes das técnicas.</li>
       </ol>
       ${kpis([
         [m.counts.groups, 'Grupos'],
         [m.counts.software, 'Softwares'],
         [m.counts.techniques, 'Técnicas'],
       ])}
-      <p class="meta-line">Fonte: ${esc(m.source)} v${esc(m.version ?? '?')} · atualizado em ${esc((m.modified ?? '').slice(0, 10))}</p>
+      <p class="meta-line">Fonte: ${esc(m.source)} v${esc(m.version ?? '?')} · atualizada em ${esc(fmtDate(m.modified))}</p>
     </div>`;
   }
 
