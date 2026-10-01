@@ -44,6 +44,10 @@ node scripts/etl.mjs data/enterprise-attack.json public/data/attack-graph.json
 
 O ETL mantém apenas `intrusion-set`, `malware`, `tool` e `attack-pattern`, relacionamentos `uses`, remove objetos revogados/depreciados e anexa mitigações e táticas a cada técnica. A aplicação **não** consulta o servidor TAXII em tempo real: tudo é carregado de um JSON estático.
 
+## Deploy no Vercel
+
+O `vercel.json` já está configurado: o build baixa o STIX oficial, roda o ETL e publica `dist/`. Basta importar o repositório em [vercel.com/new](https://vercel.com/new) e confirmar.
+
 ## Validação
 
 ```bash
