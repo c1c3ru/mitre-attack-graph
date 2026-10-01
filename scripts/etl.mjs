@@ -128,6 +128,16 @@ if (existsSync(ptFile)) {
   for (const n of nodes) if (pt[n.id]) (n.description_pt = pt[n.id]), applied++;
   console.log(`Descrições em português aplicadas: ${applied}`);
 }
+// Nomes de técnicas em português (i18n/pt-BR/technique-names.json: { "T1059": "Interpretador de Comandos e Scripts", ... })
+const namesFile = resolve('i18n/pt-BR/technique-names.json');
+if (existsSync(namesFile)) {
+  const names = JSON.parse(readFileSync(namesFile, 'utf8'));
+  let applied = 0;
+  for (const n of nodes) if (n.type === 'technique' && names[n.id]) (n.name_pt = names[n.id]), applied++;
+  console.log(`Nomes de técnicas em português aplicados: ${applied}`);
+}
+const missing = nodes.filter((n) => n.description && !n.description_pt).length;
+if (missing) console.warn(`Atenção: ${missing} nós ainda sem descrição em português.`);
 for (const n of nodes) if (n.mitigations) n.mitigations.sort((a, b) => a.id.localeCompare(b.id));
 
 // Táticas na ordem da kill chain (definida pela matriz Enterprise)

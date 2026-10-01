@@ -1,7 +1,7 @@
 /**
  * Internacionalização (pt-BR / en): textos da interface, táticas, mitigações,
- * plataformas, números e plurais. Nomes e IDs oficiais do MITRE (grupos,
- * softwares, técnicas) permanecem no original.
+ * plataformas, números e plurais. Nomes de grupos e softwares são nomes
+ * próprios e permanecem no original; técnicas usam name_pt em português.
  */
 
 export const LANGS = ['pt', 'en'];
@@ -95,6 +95,23 @@ const STRINGS = {
     'empty.step2': 'Clique em um nó para destacar as respectivas conexões.',
     'empty.step3': 'Utilize a roda do mouse para ampliar ou reduzir e arraste para navegar; amplie a visualização para ler os nomes das técnicas.',
     'empty.source': 'Fonte: {source} v{version} · atualizada em {date}',
+    'empty.sourceName': 'MITRE ATT&CK, matriz Enterprise (STIX 2.1)',
+    'sb.open.title': 'Abrir detalhes',
+    'sb.filterTactic.title': 'Filtrar o grafo por esta tática',
+    'sb.filterTactic.active': 'Filtro ativo. Clique para remover',
+    'sb.mitigation.title': 'Ver detalhes da mitigação',
+    'sb.platform.title': 'Ver itens desta plataforma no grafo',
+    'sb.kpi.title': 'Ir para a seção correspondente',
+    'modal.close': 'Fechar',
+    'modal.mitigation': 'Mitigação',
+    'modal.platform': 'Plataforma',
+    'modal.mitigates.inGraph': 'Técnicas mitigadas no grafo atual',
+    'modal.mitigates.total': 'Na base completa, esta mitigação abrange {n}.',
+    'modal.mitigates.none': 'Nenhuma técnica do grafo atual é abrangida por esta mitigação.',
+    'modal.platform.lead': 'Softwares e técnicas do grafo atual que atuam nesta plataforma.',
+    'modal.platform.software': 'Softwares',
+    'modal.platform.techniques': 'Técnicas',
+    'modal.platform.total': 'Na base completa: {sw} e {tech}.',
     'tooltip.inGraph': 'no grafo',
     'n.group': ['grupo', 'grupos'],
     'n.software': ['software', 'softwares'],
@@ -166,6 +183,23 @@ const STRINGS = {
     'empty.step2': 'Click a node to highlight its connections.',
     'empty.step3': 'Use the mouse wheel to zoom and drag to pan; zoom in to read technique names.',
     'empty.source': 'Source: {source} v{version} · updated on {date}',
+    'empty.sourceName': 'MITRE ATT&CK Enterprise (STIX 2.1)',
+    'sb.open.title': 'Open details',
+    'sb.filterTactic.title': 'Filter the graph by this tactic',
+    'sb.filterTactic.active': 'Filter active. Click to remove',
+    'sb.mitigation.title': 'View mitigation details',
+    'sb.platform.title': 'View items on this platform in the graph',
+    'sb.kpi.title': 'Go to the related section',
+    'modal.close': 'Close',
+    'modal.mitigation': 'Mitigation',
+    'modal.platform': 'Platform',
+    'modal.mitigates.inGraph': 'Mitigated techniques in the current graph',
+    'modal.mitigates.total': 'Across the full dataset, this mitigation covers {n}.',
+    'modal.mitigates.none': 'No technique in the current graph is covered by this mitigation.',
+    'modal.platform.lead': 'Software and techniques in the current graph that target this platform.',
+    'modal.platform.software': 'Software',
+    'modal.platform.techniques': 'Techniques',
+    'modal.platform.total': 'Full dataset: {sw} and {tech}.',
     'tooltip.inGraph': 'in the graph',
     'n.group': ['group', 'groups'],
     'n.software': ['software', 'software'],
@@ -278,11 +312,14 @@ export const PLATFORM_PT = {
   'Office Suite': 'Pacote de escritório',
   'Identity Provider': 'Provedor de identidade',
   'Field Controller/RTU/PLC/IED': 'Controlador de campo/RTU/CLP/IED',
+  PRE: 'PRE (pré-comprometimento)',
 };
 
 export const tacticLabel = (tac) => (lang === 'pt' ? TACTIC_PT[tac.shortname] ?? tac.nameEn : tac.nameEn);
 export const mitigationLabel = (m) => (lang === 'pt' ? MITIGATION_PT[m.id] ?? m.name : m.name);
 export const platformLabel = (p) => (lang === 'pt' ? PLATFORM_PT[p] ?? p : p);
+/** Nome exibido do nó: técnicas têm nome traduzido (name_pt); grupos e softwares são nomes próprios. */
+export const nodeName = (n) => (lang === 'pt' && n.name_pt ? n.name_pt : n.name);
 
 /** Aplica os textos estáticos marcados no HTML (data-i18n e data-i18n-attr="atributo:chave;..."). */
 export function applyStatic(root = document) {
